@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Agenda Clínica MM",
+    "slug": "agenda-clinica-mm",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.mmsistemastecnologia.agendaclinica",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./icon.png",
+        "backgroundColor": "#10110f"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.mmsistemastecnologia.agendaclinica"
+    },
+    "extra": {
+      "eas": {}
+    },
+    "icon": "./icon.png",
+    "splash": {
+      "image": "./icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#10110f"
+    }
+  }
+}
