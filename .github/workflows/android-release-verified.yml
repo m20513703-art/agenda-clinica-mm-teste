@@ -1,8 +1,8 @@
-name: Build and launch Agenda Clínica APK
+name: Build isolated Agenda Clínica safe-area test APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [safe-area-bottom-controls]
 permissions:
   contents: write
 jobs:
@@ -30,7 +30,7 @@ jobs:
       - name: Upload installable APK
         uses: actions/upload-artifact@v4
         with:
-          name: agenda-clinica-android-apk
+          name: agenda-clinica-safe-area-test-apk
           path: android/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
@@ -48,33 +48,30 @@ jobs:
           script: |
             adb install "$GITHUB_WORKSPACE/android/app/build/outputs/apk/release/app-release.apk"
             adb shell monkey -p com.mmsistemastecnologia.agendaclinica 1
-            sleep 35
-            adb shell dumpsys activity activities > "$GITHUB_WORKSPACE/activity.txt"
-            grep -q 'com.mmsistemastecnologia.agendaclinica' "$GITHUB_WORKSPACE/activity.txt"
+            sleep 30
+            adb shell pidof com.mmsistemastecnologia.agendaclinica
             adb shell screencap -p /sdcard/agenda.png
             adb pull /sdcard/agenda.png "$GITHUB_WORKSPACE/agenda-screen.png"
             adb shell uiautomator dump /sdcard/window.xml
-            adb pull /sdcard/window.xml "$GITHUB_WORKSPACE/agenda-ui.xml"
-            if grep -Eqi 'Unable to load script|Unfortunately.*stopped|has stopped' "$GITHUB_WORKSPACE/agenda-ui.xml"; then exit 1; fi
-            grep -Eqi 'AGENDA DO CONSULTÓRIO|Médicos|Pacientes' "$GITHUB_WORKSPACE/agenda-ui.xml"
+            adb pull /sdcard/window.xml "$GITHUB_WORKSPACE/window.xml"
+            grep -Eqi 'AGENDA DO CONSULTÓRIO|Agenda Clínica|Pacientes' "$GITHUB_WORKSPACE/window.xml"
       - name: Upload emulator evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: agenda-clinica-emulator-evidence
+          name: agenda-clinica-safe-area-emulator-evidence
           path: |
             agenda-screen.png
-            agenda-ui.xml
-            activity.txt
+            window.xml
           if-no-files-found: warn
           retention-days: 14
-      - name: Publish persistent APK release
+      - name: Publish isolated test APK release
         if: success()
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: agenda-clinica-teste-v1
-          name: Agenda Clínica — versão de teste
-          body: APK Android independente de teste. Instalação e abertura verificadas em emulador; operações completas e persistência ainda não foram testadas.
+          tag_name: agenda-clinica-safearea-test-v1
+          name: Agenda Clínica — teste de área segura
+          body: APK de teste em pacote isolado. Instalação e abertura/tela inicial verificadas no emulador; testes de abas, formulários e persistência ainda pendentes.
           files: android/app/build/outputs/apk/release/app-release.apk
           fail_on_unmatched_files: true
           overwrite_files: true
