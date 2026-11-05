@@ -48,14 +48,13 @@ jobs:
           script: |
             adb install "$GITHUB_WORKSPACE/android/app/build/outputs/apk/release/app-release.apk"
             adb shell monkey -p com.mmsistemastecnologia.agendaclinica 1
-            sleep 25
-            adb shell dumpsys activity activities > "$GITHUB_WORKSPACE/activity.txt"
-            grep -q 'com.mmsistemastecnologia.agendaclinica' "$GITHUB_WORKSPACE/activity.txt"
+            sleep 30
+            adb shell pidof com.mmsistemastecnologia.agendaclinica
             adb shell screencap -p /sdcard/agenda.png
             adb pull /sdcard/agenda.png "$GITHUB_WORKSPACE/agenda-screen.png"
             adb shell uiautomator dump /sdcard/window.xml
             adb pull /sdcard/window.xml "$GITHUB_WORKSPACE/window.xml"
-            grep -Eqi 'AGENDA DO CONSULTÓRIO|Médicos|Pacientes' "$GITHUB_WORKSPACE/window.xml"
+            grep -Eqi 'AGENDA DO CONSULTÓRIO|Agenda Clínica|Pacientes' "$GITHUB_WORKSPACE/window.xml"
       - name: Upload emulator evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -64,7 +63,6 @@ jobs:
           path: |
             agenda-screen.png
             window.xml
-            activity.txt
           if-no-files-found: warn
           retention-days: 14
       - name: Publish isolated test APK release
@@ -73,7 +71,7 @@ jobs:
         with:
           tag_name: agenda-clinica-safearea-test-v1
           name: Agenda Clínica — teste de área segura
-          body: Build de teste isolada. Abertura e tela da agenda verificadas em emulador; formulários, abas e persistência não foram verificados integralmente.
+          body: APK de teste em pacote isolado. Instalação e abertura/tela inicial verificadas no emulador; testes de abas, formulários e persistência ainda pendentes.
           files: android/app/build/outputs/apk/release/app-release.apk
           fail_on_unmatched_files: true
           overwrite_files: true
